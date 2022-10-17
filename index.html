@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body  {
+            //background-image: linear-gradient(#07C8F9,#09A6F3,#0A85ED,#0C63E7);
+            background-color: #B2B2B2;
+            overflow: hidden;
+        }
+        .container { 
+            height: 587px;
+            position: relative;
+            border: 3px solid green; 
+        }
+
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+        .btn {
+            background-color: DodgerBlue;
+            border: none;
+            color: white;
+            margin: 7px;
+            padding: 6px 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #copyright {
+            position: absolute;
+            bottom: 0;
+            right: 5px;
+        }
+
+        /* Darker background on mouse-over */
+        .btn:hover {
+            background-color: RoyalBlue;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="center">
+            <button class="btn" onclick="click_admin()"><img src="static/img/shield-alert.svg"></i> Admin</button>
+            <button class="btn"><img src="static/img/log-in.svg"></i> Login</button>
+            <button class="btn"><img src="static/img/file-signature.svg"></i> Input Pibal</button>
+            <button class="btn"><img src="static/img/history.svg"></i> History Data</button>
+        </div>
+        <div id="copyright">Created by <a href="https://github.com/genomexyz">genomexyz</a></div>
+      </div>
+      <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+        <span class="close">&times;</span>
+            <div id="popup">
+
+            </div>
+        </div>
+    
+    </div>
+</body>
+<script>
+    function click_admin() {
+        // Get the modal
+        var modal = document.getElementById("myModal")
+        astilectron.sendMessage("akses_admin", function(message) {
+            var data = JSON.parse(message)
+            var status = data["status"]
+            if (status == "not_login") {
+                var popup = document.getElementById('popup')
+                popup.innerHTML = ""
+
+                var img = document.createElement("img")
+                img.src = "static/img/x-circle.svg"
+                img.style.display = "inline"
+                popup.appendChild(img)
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = "LOGIN FIRST"
+                popup.appendChild(h3)
+            }
+
+            modal.style.display = "block"
+        });
+    }
+
+    // Get the modal
+    var modal = document.getElementById("myModal");
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+</html>
