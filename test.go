@@ -1,16 +1,31 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
+	_ "github.com/mattn/go-sqlite3"
+	"go.mongodb.org/mongo-driver/bson"
 )
+
+type userpass_check struct {
+	username string
+	password string
+}
 
 func main() {
 	//state
 	login_state := false
+	username_login := ""
+	display_name_login := ""
+
+	//open db
+	db, err := sql.Open("sqlite3", "./pibal.db")
+	fmt.Println(db)
 
 	// Set logger
 	l := log.New(log.Writer(), log.Prefix(), log.Flags())
@@ -53,9 +68,62 @@ func main() {
 		//for feature akses admin
 		if s == "akses_admin" {
 			if login_state {
-				return "{\"status\": \"not_login\", \"username\": \"\", \"display_name\": \"\"}"
+				return "{\"status\": \"login\", \"username\": \"\", \"display_name\": \"\"}"
 			} else {
 				return "{\"status\": \"not_login\", \"username\": \"\", \"display_name\": \"\"}"
+			}
+		} else if s == "akses_login" {
+			if login_state {
+				return "{\"status\": \"login\", \"username\": \"\", \"display_name\": \"\"}"
+			} else {
+				return "{\"status\": \"not_login\", \"username\": \"\", \"display_name\": \"\"}"
+			}
+		} else {
+			var data bson.M
+			json.Unmarshal([]byte(s), &data)
+			fmt.Println("USERPASS YANG DIDAPATKAN", data)
+
+			if data["action"] == "login" {
+				user := data["username"]
+				password := data["password"]
+				rows, err := db.Query("select username, display_name from userpass where username = $1 and password = $2", user, password)
+				if err != nil {
+					fmt.Println("error select table:", err)
+				}
+				defer rows.Close()
+
+				for rows.Next() {
+
+					err = rows.Scan(&username_login, &display_name_login)
+
+					if err != nil {
+						log.Fatal(err)
+					}
+					break
+				}
+				if username_login != "" {
+					login_state = true
+					var sending_data bson.M
+					sending_data["status"] = "login_success"
+					sending_data["username"] = username_login
+					sending_data["display_name"] = display_name_login
+					json_send, err := json.Marshal(sending_data)
+					if err != nil {
+						log.Fatal(err)
+					}
+					return json_send
+				} else {
+					sending_data := bson.M{}
+					sending_data["status"] = "login_failed"
+					sending_data["username"] = username_login
+					sending_data["display_name"] = display_name_login
+					json_send, err := json.Marshal(sending_data)
+					if err != nil {
+						log.Fatal(err)
+					}
+					return string(json_send)
+				}
+
 			}
 		}
 
@@ -68,6 +136,9 @@ func main() {
 	if err = w.Create(); err != nil {
 		l.Fatal(fmt.Errorf("main: creating window failed: %w", err))
 	}
+
+	// Open dev tools
+	//w.OpenDevTools()
 
 	// Blocking pattern
 	a.Wait()

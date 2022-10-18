@@ -85,11 +85,13 @@
 </head>
 <body>
     <div class="container">
+        <p id="display_name" style="margin-left: 5px;">hello, guest</p>
         <div class="center">
             <button class="btn" onclick="click_admin()"><img src="static/img/shield-alert.svg"></i> Admin</button>
-            <button class="btn"><img src="static/img/log-in.svg"></i> Login</button>
+            <button class="btn" onclick="click_login()"><img src="static/img/log-in.svg"></i> Login</button>
             <button class="btn"><img src="static/img/file-signature.svg"></i> Input Pibal</button>
             <button class="btn"><img src="static/img/history.svg"></i> History Data</button>
+            <button class="btn"><img src="static/img/log-out.svg"></i> Logout</button>
         </div>
         <div id="copyright">Created by <a href="https://github.com/genomexyz">genomexyz</a></div>
       </div>
@@ -107,6 +109,9 @@
     </div>
 </body>
 <script>
+    display_name = "guest"
+    username_login = ""
+
     function click_admin() {
         // Get the modal
         var modal = document.getElementById("myModal")
@@ -125,6 +130,13 @@
                 var h3 = document.createElement("h3")
                 h3.innerHTML = "LOGIN FIRST"
                 popup.appendChild(h3)
+            } else {
+                var popup = document.getElementById('popup')
+                popup.innerHTML = ""
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = "LOGIN CONTENT"
+                popup.appendChild(h3)
             }
 
             modal.style.display = "block"
@@ -140,5 +152,94 @@
             modal.style.display = "none";
         }
     }
+
+    function click_login() {
+        console.log("fire click login")
+        var modal = document.getElementById("myModal")
+        astilectron.sendMessage("akses_login", function(message) {
+            var data = JSON.parse(message)
+            var status = data["status"]
+            console.log("isi data", data)
+            if (status == "not_login") {
+                var popup = document.getElementById('popup')
+                popup.innerHTML = ""
+
+                var label = document.createElement("label")
+                label.htmlFor = "uname"
+                label.innerHTML = "<b>Username</b>"
+                popup.appendChild(label)
+
+                popup.innerHTML += " : "
+
+                var input = document.createElement("input")
+                input.id = "uname"
+                input.name = "uname"
+                input.type = "text"
+                input.placeholder = "masukkan username"
+                input.required = true
+                popup.appendChild(input)
+
+                popup.innerHTML += "<br><br>"
+
+                var label = document.createElement("label")
+                label.htmlFor = "password"
+                label.innerHTML = "<b>Password</b>"
+                popup.appendChild(label)
+
+                popup.innerHTML += " : "
+
+                var input = document.createElement("input")
+                input.id = "password"
+                input.name = "password"
+                input.type = "password"
+                input.placeholder = "masukkan password"
+                input.required = true
+                popup.appendChild(input)
+
+                popup.innerHTML += "<br><br>"
+
+                var btn = document.createElement("button")
+                btn.className = "btn"
+
+                var img = document.createElement("img")
+                img.src = "static/img/key.svg"
+                btn.appendChild(img)
+                btn.innerHTML += "Login"
+                btn.setAttribute("onclick", "send_userpass()")
+                popup.appendChild(btn)
+
+                
+            } else if (status == "login") {
+                var popup = document.getElementById('popup')
+                popup.innerHTML = ""
+
+                var img = document.createElement("img")
+                img.src = "static/img/x-circle.svg"
+                img.style.display = "inline"
+                popup.appendChild(img)
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = "ALREADY LOGIN, LOGOUT FIRST"
+                popup.appendChild(h3)
+            }
+            modal.style.display = "block"
+        })
+    }
+
+    function send_userpass() {
+        var username = document.getElementById("uname").value
+        var password = document.getElementById("password").value
+        var send_data = {}
+        send_data["action"] = "login"
+        send_data["username"] = username
+        send_data["password"] = password
+        send_data_string = JSON.stringify(send_data)
+        astilectron.sendMessage(send_data_string, function(message) {
+            console.log("cek", message)
+            modal.style.display = "none"
+        })
+        console.log("send", username, password)
+    }
+
 </script>
 </html>
