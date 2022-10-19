@@ -68,7 +68,16 @@ func main() {
 		//for feature akses admin
 		if s == "akses_admin" {
 			if login_state {
-				return "{\"status\": \"login\", \"username\": \"\", \"display_name\": \"\"}"
+				sending_data := bson.M{}
+				sending_data["status"] = "login"
+				sending_data["username"] = username_login
+				sending_data["display_name"] = display_name_login
+				json_send, err := json.Marshal(sending_data)
+				if err != nil {
+					log.Fatal(err)
+				}
+				json_send_str := string(json_send)
+				return json_send_str
 			} else {
 				return "{\"status\": \"not_login\", \"username\": \"\", \"display_name\": \"\"}"
 			}
@@ -103,7 +112,7 @@ func main() {
 				}
 				if username_login != "" {
 					login_state = true
-					var sending_data bson.M
+					sending_data := bson.M{}
 					sending_data["status"] = "login_success"
 					sending_data["username"] = username_login
 					sending_data["display_name"] = display_name_login
@@ -111,7 +120,7 @@ func main() {
 					if err != nil {
 						log.Fatal(err)
 					}
-					return json_send
+					return string(json_send)
 				} else {
 					sending_data := bson.M{}
 					sending_data["status"] = "login_failed"
@@ -138,7 +147,7 @@ func main() {
 	}
 
 	// Open dev tools
-	//w.OpenDevTools()
+	w.OpenDevTools()
 
 	// Blocking pattern
 	a.Wait()

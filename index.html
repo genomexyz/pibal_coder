@@ -81,6 +81,24 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        #table_user td, #table_user th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #table_user tr:nth-child(even){background-color: #f2f2f2;}
+
+        #table_user tr:hover {background-color: #ddd;}
+
+        #table_user th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #DFD3C3;
+            color: black;
+        }
+
     </style>
 </head>
 <body>
@@ -128,15 +146,35 @@
                 popup.appendChild(img)
 
                 var h3 = document.createElement("h3")
-                h3.innerHTML = "LOGIN FIRST"
+                h3.innerHTML = "LOGIN FIRST AS ADMIN"
                 popup.appendChild(h3)
             } else {
                 var popup = document.getElementById('popup')
                 popup.innerHTML = ""
 
-                var h3 = document.createElement("h3")
+                var table = document.createElement("table")
+                table.id = "table_user"
+                var tr = document.createElement("th")
+                
+                var td = document.createElement("td")
+                td.innerHTML = "<b>username</b>"
+                tr.appendChild(td)
+
+                var td = document.createElement("td")
+                td.innerHTML = "<b>display name</b>"
+                tr.appendChild(td)
+
+                var td = document.createElement("td")
+                td.innerHTML = "<b>password</b>"
+                tr.appendChild(td)
+
+                table.appendChild(tr)
+
+                popup.appendChild(table)
+
+                /*var h3 = document.createElement("h3")
                 h3.innerHTML = "LOGIN CONTENT"
-                popup.appendChild(h3)
+                popup.appendChild(h3)*/
             }
 
             modal.style.display = "block"
@@ -235,7 +273,14 @@
         send_data["password"] = password
         send_data_string = JSON.stringify(send_data)
         astilectron.sendMessage(send_data_string, function(message) {
-            console.log("cek", message)
+            var data = JSON.parse(message)
+            var status = data["status"]
+            console.log("login trial", data)
+            if (status == "login_success") {
+                var disp_name_p = document.getElementById("display_name")
+                display_name = data["display_name"]
+                disp_name_p.innerHTML = "hello, "+display_name
+            }
             modal.style.display = "none"
         })
         console.log("send", username, password)
