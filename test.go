@@ -67,7 +67,7 @@ func main() {
 
 		//for feature akses admin
 		if s == "akses_admin" {
-			if login_state {
+			if login_state && username_login == "admin" {
 				sending_data := bson.M{}
 				sending_data["status"] = "login"
 				sending_data["username"] = username_login
