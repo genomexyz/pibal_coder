@@ -107,7 +107,7 @@
         <div class="center">
             <button class="btn" onclick="click_admin()"><img src="static/img/shield-alert.svg"></i> Admin</button>
             <button class="btn" onclick="click_login()"><img src="static/img/log-in.svg"></i> Login</button>
-            <button class="btn"><img src="static/img/file-signature.svg"></i> Input Pibal</button>
+            <button class="btn" onclick="click_input_pibal()"><img src="static/img/file-signature.svg"></i> Input Pibal</button>
             <button class="btn"><img src="static/img/history.svg"></i> History Data</button>
             <button class="btn"><img src="static/img/log-out.svg"></i> Logout</button>
         </div>
@@ -125,10 +125,47 @@
         </div>
     
     </div>
+    <div id="modal_pibal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+        <span class="close">&times;</span>
+            <div id="popup_pibal">
+                
+            </div>
+        </div>
+    
+    </div>
 </body>
 <script>
     display_name = "guest"
     username_login = ""
+
+    function click_input_pibal() {
+        // Get the modal
+        var modal_default = document.getElementById("myModal")
+        var modal_pibal = document.getElementById("modal_pibal")
+        astilectron.sendMessage("open_input_pibal", function(message) {
+            var data = JSON.parse(message)
+            var status = data["status"]
+            if (status == "not_login") {
+                var popup = document.getElementById('popup')
+                popup.innerHTML = ""
+
+                var img = document.createElement("img")
+                img.src = "static/img/x-circle.svg"
+                img.style.display = "inline"
+                popup.appendChild(img)
+
+                var h3 = document.createElement("h3")
+                h3.innerHTML = "LOGIN FIRST"
+                popup.appendChild(h3)
+                modal_default.style.display = "block"
+            } else {
+
+            }
+        })
+    }
 
     function click_admin() {
         // Get the modal
@@ -154,21 +191,48 @@
 
                 var table = document.createElement("table")
                 table.id = "table_user"
-                var tr = document.createElement("th")
+                var tr = document.createElement("tr")
                 
-                var td = document.createElement("td")
+                var td = document.createElement("th")
                 td.innerHTML = "<b>username</b>"
                 tr.appendChild(td)
 
-                var td = document.createElement("td")
+                var td = document.createElement("th")
                 td.innerHTML = "<b>display name</b>"
                 tr.appendChild(td)
 
-                var td = document.createElement("td")
+                var td = document.createElement("th")
                 td.innerHTML = "<b>password</b>"
                 tr.appendChild(td)
 
                 table.appendChild(tr)
+
+                var cnt_row = 0
+                while (true) {
+                    if (data['data-'+cnt_row] === undefined) {
+                        break
+                    }
+                    var single_username = data['data-'+cnt_row]['username']
+                    var single_password = data['data-'+cnt_row]['password']
+                    var single_display_name = data['data-'+cnt_row]['display_name']
+                    
+                    var tr = document.createElement("tr")
+                    
+                    var td = document.createElement("td")
+                    td.innerHTML = single_username
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = single_password
+                    tr.appendChild(td)
+
+                    var td = document.createElement("td")
+                    td.innerHTML = single_display_name
+                    tr.appendChild(td)
+
+                    table.appendChild(tr)
+                    cnt_row++
+                }
 
                 popup.appendChild(table)
 

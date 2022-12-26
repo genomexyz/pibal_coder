@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
@@ -25,6 +26,11 @@ func main() {
 
 	//open db
 	db, err := sql.Open("sqlite3", "./pibal.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
 	fmt.Println(db)
 
 	// Set logger
@@ -72,6 +78,40 @@ func main() {
 				sending_data["status"] = "login"
 				sending_data["username"] = username_login
 				sending_data["display_name"] = display_name_login
+
+				// Perform a SELECT statement
+				rows, err := db.Query("SELECT username, password, display_name FROM userpass")
+				if err != nil {
+					fmt.Println(err)
+					sending_data["status_data"] = "err"
+					json_send, err := json.Marshal(sending_data)
+					if err != nil {
+						log.Fatal(err)
+					}
+					json_send_str := string(json_send)
+					return json_send_str
+				}
+				defer rows.Close()
+
+				// Iterate over the rows returned by the SELECT statement
+				cnt_row := 0
+				for rows.Next() {
+					sending_data["data-"+strconv.Itoa(cnt_row)] = bson.M{}
+					var single_username string
+					var single_password string
+					var single_display_name string
+
+					err = rows.Scan(&single_username, &single_password, &single_display_name)
+					if err != nil {
+						fmt.Println("got error in row: ", err)
+						continue
+					}
+					sending_data["data-"+strconv.Itoa(cnt_row)].(bson.M)["username"] = single_username
+					sending_data["data-"+strconv.Itoa(cnt_row)].(bson.M)["password"] = single_password
+					sending_data["data-"+strconv.Itoa(cnt_row)].(bson.M)["display_name"] = single_display_name
+					cnt_row++
+				}
+
 				json_send, err := json.Marshal(sending_data)
 				if err != nil {
 					log.Fatal(err)
@@ -87,6 +127,20 @@ func main() {
 			} else {
 				return "{\"status\": \"not_login\", \"username\": \"\", \"display_name\": \"\"}"
 			}
+		} else if s == "open_input_pibal" {
+			sending_data := bson.M{}
+			sending_data["status"] = "not_login"
+			if login_state {
+				sending_data["permission"] = "granted"
+				sending_data["status"] = "login"
+			} else {
+				sending_data["permission"] = "not granted"
+			}
+			json_send, err := json.Marshal(sending_data)
+			if err != nil {
+				log.Fatal(err)
+			}
+			return string(json_send)
 		} else {
 			var data bson.M
 			json.Unmarshal([]byte(s), &data)
@@ -147,7 +201,11 @@ func main() {
 	}
 
 	// Open dev tools
-	w.OpenDevTools()
+	fmt.Println("TRYING OPEN DEV TOOLS")
+	// Open the developer tools window
+	if err := w.OpenDevTools(); err != nil {
+		log.Fatal(err)
+	}
 
 	// Blocking pattern
 	a.Wait()
