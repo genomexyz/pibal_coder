@@ -65,6 +65,8 @@
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
+            height: 450px;
+            overflow-y: scroll;
         }
 
         /* The Close Button */
@@ -85,6 +87,19 @@
         #table_user td, #table_user th {
             border: 1px solid #ddd;
             padding: 8px;
+        }
+
+        .table_pibal td, .table_pibal th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .table_pibal tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table_pibal tr:hover {
+            background-color: #ddd;
         }
 
         #table_user tr:nth-child(even){background-color: #f2f2f2;}
@@ -125,21 +140,77 @@
         </div>
     
     </div>
-    <div id="modal_pibal" class="modal">
+    <!--<div id="modal_pibal" class="modal">
 
-        <!-- Modal content -->
-        <div class="modal-content">
+         Modal content -->
+        <!--<div class="modal-content">
         <span class="close">&times;</span>
             <div id="popup_pibal">
-                
+                <h2>Input Data Pibal</h2>
+                <div>
+                    <label for="start">Start date:</label>
+
+                    <input type="date" id="start" name="trip-start"
+                        value="2018-07-22"
+                        min="2018-01-01" max="2018-12-31">
+                </div>
             </div>
         </div>
+    </div>-->
+
+        <div id="popup_pibal" style="display: none;">
+            <h2>Input Data Pibal</h2>
+            <div style="margin: 5px;">
+                <label for="tanggal_pengamatan">Tanggal Pengamatan:</label>
+                <input type="date" id="tanggal_pengamatan" name="tanggal_pengamatan">
+                <label for="jam_pengamatan">Jam Pengamatan:</label>
+                <select id="jam_pengamatan" name="jam_pengamatan">
+                    <option value="0">00</option>
+                    <option value="0">06</option>
+                    <option value="0">12</option>
+                    <option value="0">18</option>
+                </select>
+            </div>
+            <div style="margin: 5px;">
+                <label for="sandi_angin">Sandi Angin Permukaan:</label>
+                <input pattern="[0-9]{5}" id="sandi_angin" name="sandi_angin">
+            </div>
+            <div style="margin: 5px;">
+                <label for="jumlah_balon">Jumlah Balon:</label>
+                <input type="number" id="jumlah_balon" name="jumlah_balon" maxlength="2" size=2>
+            </div>
+            <div style="margin: 5px;">
+                <label for="display_name_pibal">Nama User:</label>
+                <input id="display_name_pibal" name="display_name_pibal">
+            </div>
+            <div style="margin: 5px;">
+                <label for="keterangan_pibal">Keterangan:</label>
+                <textarea id="keterangan_pibal" name="keterangan_pibal"></textarea>
+            </div>
+            <div style="margin: 5px;">
+                <table class="table_pibal" id="tabel_pengamtan_pibal">
+                    <tr>
+                        <th>No</td>
+                        <th>Azimuth</td>
+                        <th>Elevasi</td>
+                        <th>Lapisan</td>
+                        <th>Angin</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center;"><button onclick="add_row()">+</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        
     
-    </div>
+    
 </body>
 <script>
     display_name = "guest"
     username_login = ""
+    total_row = 0
 
     function click_input_pibal() {
         // Get the modal
@@ -149,6 +220,7 @@
             var data = JSON.parse(message)
             var status = data["status"]
             if (status == "not_login") {
+                /*//ini default
                 var popup = document.getElementById('popup')
                 popup.innerHTML = ""
 
@@ -160,11 +232,82 @@
                 var h3 = document.createElement("h3")
                 h3.innerHTML = "LOGIN FIRST"
                 popup.appendChild(h3)
-                modal_default.style.display = "block"
-            } else {
+                modal_default.style.display = "block"*/
 
+                document.getElementById("popup").innerHTML = ""
+                var pibal_content = document.getElementById("popup_pibal").innerHTML
+                document.getElementById("popup").innerHTML = pibal_content
+                document.getElementById("display_name_pibal").value = display_name
+                document.getElementById("display_name_pibal").readOnly = true
+                total_row = 0
+                modal_default.style.display = "block"
+
+            } else {
+                document.getElementById("popup").innerHTML = ""
+                var pibal_content = document.getElementById("content_pibal").innerHTML
+                //document.getElementById("popup").appendChild(pibal_content)
+                document.getElementById("popup").innerHTML = pibal_content
+                total_row = 0
+                modal_default.style.display = "block"
             }
         })
+    }
+
+    function add_row() {
+        total_row += 2
+        var tabel_pibal = document.getElementById("tabel_pengamtan_pibal")
+
+        for (var iter_row = 0; iter_row < 2; iter_row++) {
+            var tr = document.createElement("tr")
+            
+            var td = document.createElement("td")
+            var input = document.createElement("input")
+            input.id = "no_pengamatan_pibal-"+total_row-(1-iter_row)
+            input.size = 2
+            input.value = total_row-(1-iter_row)
+            input.readOnly = true
+            td.appendChild(input)
+            tr.appendChild(td)
+
+            var td = document.createElement("td")
+            var input = document.createElement("input")
+            input.id = "azimuth_pengamatan_pibal-"+total_row-(1-iter_row)
+            input.size = 5
+            td.appendChild(input)
+            tr.appendChild(td)
+
+            var td = document.createElement("td")
+            var input = document.createElement("input")
+            input.id = "elevasi_pengamatan_pibal-"+total_row-(1-iter_row)
+            input.size = 5
+            td.appendChild(input)
+            tr.appendChild(td)
+
+            if (iter_row == 0) {
+                var td = document.createElement("td")
+                td.rowSpan = 2
+                var input = document.createElement("input")
+                input.id = "lapisan_pengamatan_pibal-"+total_row
+                input.size = 5
+                input.value = total_row * 1000
+                input.readOnly = true
+                td.appendChild(input)
+                tr.appendChild(td)
+            }
+            
+            if (iter_row == 0) {
+                var td = document.createElement("td")
+                td.rowSpan = 2
+                var input = document.createElement("input")
+                input.id = "angin_pengamatan_pibal-"+total_row
+                input.size = 5
+                input.readOnly = true
+                td.appendChild(input)
+                tr.appendChild(td)
+            }
+            tabel_pibal.appendChild(tr)
+        }
+
     }
 
     function click_admin() {
@@ -247,13 +390,20 @@
 
     // Get the modal
     var modal = document.getElementById("myModal");
+    //var modal_pibal_global = document.getElementById("modal_pibal");
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
-            modal.style.display = "none";
+            modal.style.display = "none"
         }
     }
+
+    /*window.onclick = function(event) {
+        if (event.target == modal_pibal_global) {
+            modal_pibal_global.style.display = "none"
+        }
+    }*/
 
     function click_login() {
         console.log("fire click login")
